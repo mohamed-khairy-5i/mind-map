@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/mindforge-icon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- SEO Meta Tags -->
+    <title>MindForge - أداة إنشاء الخرائط الذهنية بالذكاء الاصطناعي</title>
+    <meta name="description" content="أنشئ خرائط ذهنية تفاعلية ومذهلة باستخدام الذكاء الاصطناعي. مدعوم بتقنية Google Gemini لتوليد الأفكار والتحليل الذكي." />
+    <meta name="keywords" content="خرائط ذهنية, ذكاء اصطناعي, تنظيم الأفكار, إدارة المشاريع, تعلم, إبداع" />
+    <meta name="author" content="MindForge Team" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="MindForge - أداة إنشاء الخرائط الذهنية بالذكاء الاصطناعي" />
+    <meta property="og:description" content="أنشئ خرائط ذهنية تفاعلية ومذهلة باستخدام الذكاء الاصطناعي. مدعوم بتقنية Google Gemini." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/mindforge-preview.jpg" />
+    <meta property="og:url" content="https://mindforge.netlify.app" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MindForge - أداة إنشاء الخرائط الذهنية بالذكاء الاصطناعي" />
+    <meta name="twitter:description" content="أنشئ خرائط ذهنية تفاعلية ومذهلة باستخدام الذكاء الاصطناعي." />
+    <meta name="twitter:image" content="/mindforge-preview.jpg" />
+    
+    <!-- Preload important resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="MindForge" />
+    
+    <!-- Performance optimizations -->
+    <link rel="dns-prefetch" href="//generativelanguage.googleapis.com">
+    
+    <style>
+      /* Loading screen styles */
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      .loading-content {
+        text-align: center;
+        color: white;
+      }
+      
+      .loading-logo {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        animation: pulse 2s infinite;
+      }
+      
+      .loading-text {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      
+      .loading-subtext {
+        font-size: 16px;
+        opacity: 0.8;
+      }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top: 3px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 20px auto 0;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <div class="loading-content">
+        <div class="loading-logo">🧠</div>
+        <div class="loading-text">MindForge</div>
+        <div class="loading-subtext">أداة إنشاء الخرائط الذهنية بالذكاء الاصطناعي</div>
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+    
+    <!-- Main App -->
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <script>
+      // Hide loading screen when app loads
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+              loadingScreen.style.display = 'none';
+            }, 500);
+          }
+        }, 1000);
+      });
+    </script>
+  </body>
+</html>

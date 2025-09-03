@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://mindcraft-ai.netlify.app/sitemap.xml

@@ -1,5 +1,5 @@
 [build]
-  publish = ".next"
+  publish = "dist"
   command = "npm run build"
 
 [[redirects]]
@@ -11,24 +11,21 @@
   NODE_VERSION = "18"
 
 [[headers]]
-  for = "/*"
+  for = "/static/*"
   [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Cache-Control = "no-cache"
+    cache-control = "max-age=31536000"
 
 [[headers]]
   for = "/*.js"
   [headers.values]
-    Cache-Control = "public, max-age=31536000"
+    cache-control = "max-age=31536000"
 
 [[headers]]
   for = "/*.css"
   [headers.values]
-    Cache-Control = "public, max-age=31536000"
+    cache-control = "max-age=31536000"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    cache-control = "max-age=0"
