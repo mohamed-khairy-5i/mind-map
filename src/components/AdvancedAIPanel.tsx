@@ -27,7 +27,7 @@ import {
   Camera,
   Layers,
   RefreshCw,
-  Magic,
+
   Cpu,
   MessageSquare,
   ChevronRight,

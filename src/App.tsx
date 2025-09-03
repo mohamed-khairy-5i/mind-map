@@ -24,7 +24,6 @@ import {
   Zap,
   Settings,
   Menu,
-  X,
   Maximize,
   Minimize
 } from 'lucide-react';

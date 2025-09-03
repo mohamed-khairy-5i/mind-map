@@ -158,7 +158,7 @@ export async function expandNodeIntelligent(
 - العقدة المحددة: "${selectedNode.data.label}"
 - وصف العقدة: "${selectedNode.data.description || ''}"
 - نوع العقدة: ${selectedNode.data.type}
-- العقد المرتبطة: ${context.connectedNodes.map(n => n.data.label).join(', ')}
+- العقد المرتبطة: ${context.connectedNodes.map((n: any) => n.data.label).join(', ')}
 - الموضوع العام: ${context.mainTheme}
 
 متطلبات التوسيع:
@@ -249,7 +249,7 @@ export async function expandNodeIntelligent(
         style: { 
           stroke: selectedNode.data.color || '#667eea', 
           strokeWidth: 2 
-        },
+        } as any,
         data: {
           type: 'hierarchy',
           strength: 0.8
