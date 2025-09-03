@@ -1,97 +1,344 @@
+/* Import modern fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbar */
+/* Custom properties for theme system */
+:root {
+  --neural-primary: #667eea;
+  --neural-secondary: #764ba2;
+  --neural-accent: #f093fb;
+  --neural-glow: rgba(102, 126, 234, 0.3);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+}
+
+.dark {
+  --neural-glow: rgba(102, 126, 234, 0.5);
+  --glass-bg: rgba(0, 0, 0, 0.2);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  color-scheme: dark;
+}
+
+/* Enhanced scrollbar with neural theme */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-slate-100 dark:bg-slate-800;
+  @apply bg-slate-50 dark:bg-slate-900 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-600 rounded-full;
+  @apply bg-gradient-to-b from-neural-node to-neural-connection rounded-full;
+  background: linear-gradient(to bottom, var(--neural-primary), var(--neural-secondary));
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400 dark:bg-slate-500;
+  background: linear-gradient(to bottom, var(--neural-secondary), var(--neural-primary));
 }
 
-/* React Flow styles */
+/* Global styles for smooth animations */
+* {
+  @apply transition-colors duration-300;
+}
+
+/* Typography enhancements */
+body {
+  @apply font-body antialiased;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-display font-semibold;
+}
+
+/* React Flow neural enhancements */
 .react-flow__node {
-  @apply transition-all duration-300;
+  @apply transition-all duration-300 ease-out;
 }
 
 .react-flow__node.selected {
-  @apply ring-2 ring-blue-500 ring-opacity-60;
+  animation: neuralPulse 1.5s ease-in-out infinite alternate;
+}
+
+.react-flow__node:hover {
+  @apply transform scale-110 z-10;
+  filter: drop-shadow(0 10px 20px rgba(102, 126, 234, 0.25));
 }
 
 .react-flow__edge {
-  @apply transition-all duration-300;
+  @apply transition-all duration-500;
+}
+
+.react-flow__edge.animated path {
+  stroke-dasharray: 5;
+  animation: dash 1s linear infinite;
 }
 
 .react-flow__edge.selected {
   @apply opacity-100;
+  stroke-width: 3;
+  stroke: url(#neural-gradient);
 }
 
-/* Custom node styles */
+/* Advanced node styles with glassmorphism */
 .mindmap-node {
-  @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg transition-all duration-300;
+  @apply relative overflow-hidden rounded-neural shadow-neural transition-all duration-300;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+}
+
+.dark .mindmap-node {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.mindmap-node::before {
+  content: '';
+  @apply absolute inset-0 rounded-neural opacity-0 transition-opacity duration-300;
+  background: linear-gradient(135deg, var(--neural-primary), var(--neural-secondary));
+}
+
+.mindmap-node:hover::before {
+  @apply opacity-10;
 }
 
 .mindmap-node:hover {
-  @apply shadow-xl transform scale-105;
+  @apply shadow-lift transform scale-105;
+  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
 }
 
+/* Specialized node types */
 .mindmap-node.central {
-  @apply bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-2xl;
+  @apply text-white border-0 shadow-glow;
+  background: linear-gradient(135deg, var(--neural-primary), var(--neural-secondary));
+  animation: gradientShift 3s ease-in-out infinite;
+  background-size: 200% 200%;
 }
 
 .mindmap-node.category {
-  @apply bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-blue-200 dark:border-blue-700;
+  @apply border-brand-200 dark:border-brand-700;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+}
+
+.dark .mindmap-node.category {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(2, 132, 199, 0.1));
 }
 
 .mindmap-node.idea {
-  @apply bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 border-green-200 dark:border-green-700;
+  @apply border-success-200 dark:border-success-700;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
 }
 
-/* Loading animations */
-@keyframes shimmer {
+.dark .mindmap-node.idea {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+}
+
+/* Glassmorphism components */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  @apply rounded-xl shadow-glass;
+}
+
+.glass-button {
+  @apply glass-panel px-4 py-2 hover:bg-white/20 dark:hover:bg-black/20 active:scale-95 transition-all duration-200;
+}
+
+/* Enhanced loading animations */
+.shimmer-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* Neural network inspired animations */
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+@keyframes neuralConnect {
   0% {
-    background-position: -200px 0;
+    stroke-dasharray: 0 100;
   }
   100% {
-    background-position: calc(200px + 100%) 0;
+    stroke-dasharray: 100 0;
   }
 }
 
-.shimmer {
-  background: linear-gradient(90deg, #f0f0f0 0px, #e0e0e0 40px, #f0f0f0 80px);
-  background-size: 200px;
-  animation: shimmer 1.5s infinite;
-}
-
-/* Dark mode */
-.dark {
-  color-scheme: dark;
-}
-
-/* Glassmorphism effect */
-.glass {
-  @apply backdrop-blur-lg bg-white/10 dark:bg-black/10 border border-white/20 dark:border-white/10;
-}
-
-/* Text glow effect */
-.text-glow {
-  text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-}
-
-/* Gradient text */
+/* Gradient text effects */
 .gradient-text {
-  @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(135deg, var(--neural-primary), var(--neural-secondary));
+}
+
+.gradient-text-animated {
+  @apply gradient-text;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease-in-out infinite;
+}
+
+/* Glow effects */
+.text-glow {
+  text-shadow: 0 0 20px var(--neural-glow);
+}
+
+.box-glow {
+  box-shadow: 0 0 30px var(--neural-glow);
+}
+
+/* Button enhancements */
+.btn-neural {
+  @apply relative overflow-hidden rounded-neural px-6 py-3 font-medium text-white transition-all duration-300;
+  background: linear-gradient(135deg, var(--neural-primary), var(--neural-secondary));
+}
+
+.btn-neural::before {
+  content: '';
+  @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+  background: linear-gradient(135deg, var(--neural-secondary), var(--neural-accent));
+}
+
+.btn-neural:hover::before {
+  @apply opacity-100;
+}
+
+.btn-neural:hover {
+  @apply transform scale-105 shadow-glow;
+}
+
+.btn-neural:active {
+  @apply scale-95;
+}
+
+/* Floating action button */
+.fab {
+  @apply btn-neural fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-lift;
+  animation: float 3s ease-in-out infinite;
+}
+
+.fab:hover {
+  animation-play-state: paused;
+}
+
+/* Card enhancements */
+.card-neural {
+  @apply glass-panel p-6 hover:shadow-lift hover:scale-105 transition-all duration-300;
+}
+
+.card-neural::after {
+  content: '';
+  @apply absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 pointer-events-none;
+  background: linear-gradient(135deg, var(--neural-primary), var(--neural-secondary));
+}
+
+.card-neural:hover::after {
+  @apply opacity-5;
+}
+
+/* Input field enhancements */
+.input-neural {
+  @apply glass-panel px-4 py-3 focus:ring-2 focus:ring-neural-node focus:border-transparent;
+}
+
+.input-neural:focus {
+  background: rgba(102, 126, 234, 0.05);
+}
+
+/* Tooltip with neural styling */
+.tooltip-neural {
+  @apply glass-panel px-3 py-2 text-sm rounded-lg shadow-neural;
+  animation: scaleIn 0.2s ease-out;
+}
+
+/* Progress indicators */
+.progress-neural {
+  @apply w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden;
+}
+
+.progress-neural-bar {
+  @apply h-full rounded-full transition-all duration-500;
+  background: linear-gradient(90deg, var(--neural-primary), var(--neural-secondary));
+}
+
+/* Loading spinner with neural theme */
+.spinner-neural {
+  @apply w-6 h-6 border-2 border-transparent rounded-full animate-spin;
+  border-top-color: var(--neural-primary);
+  border-right-color: var(--neural-secondary);
+}
+
+/* Responsive utilities */
+@screen sm {
+  .mindmap-node {
+    @apply text-sm;
+  }
+}
+
+@screen md {
+  .mindmap-node {
+    @apply text-base;
+  }
+}
+
+@screen lg {
+  .mindmap-node {
+    @apply text-lg;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .mindmap-node {
+    @apply border-2 border-black dark:border-white;
+  }
+  
+  .glass-panel {
+    @apply bg-white dark:bg-black border-black dark:border-white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .react-flow__controls,
+  .react-flow__minimap,
+  .glass-panel:not(.mindmap-node) {
+    @apply hidden;
+  }
+  
+  .mindmap-node {
+    @apply bg-white border-black text-black shadow-none;
+  }
 }
