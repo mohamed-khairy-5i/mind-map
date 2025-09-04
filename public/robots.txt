@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Main pages
+Allow: /index.html
+Allow: /
+
+# Assets
+Allow: /assets/
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.gif
+Allow: /*.svg
+Allow: /*.webp
+Allow: /*.ico
+
+# PWA files
+Allow: /manifest.json
+Allow: /sw.js
+
+# Sitemap
+Sitemap: https://neuralmind-pro.netlify.app/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1

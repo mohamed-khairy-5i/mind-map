@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { type Node, type Edge } from '@xyflow/react';
 import { v4 as uuidv4 } from 'uuid';
+import { analyzeURL, type ContentAnalysisResult } from './contentAnalysisService';
 
 // Enhanced AI Configuration
 const API_KEY = 'AIzaSyByEXNDlu9kNaxJWxm7mxxe5vmAqe98DpE';
@@ -69,10 +70,9 @@ interface EnhancedMindMapData {
   };
 }
 
-// Enhanced mind map generation with advanced AI
-export async function generateEnhancedMindMap(
-  prompt: string,
-  inputType: 'text' | 'image' | 'audio' | 'video' = 'text',
+// Generate mind map from URL content
+export async function generateMindMapFromURL(
+  url: string,
   config: AIConfig = {
     model: 'gemini-pro',
     creativity: 70,
@@ -83,6 +83,38 @@ export async function generateEnhancedMindMap(
     includeColors: true,
     maxNodes: 20
   }
+): Promise<{ nodes: Node[], edges: Edge[], metadata: any }> {
+  try {
+    // First, analyze the URL content
+    const contentAnalysis = await analyzeURL(url);
+    
+    // Create enhanced prompt based on content analysis
+    const enhancedPrompt = createPromptFromContent(contentAnalysis, config);
+    
+    // Generate mind map using the content
+    return await generateEnhancedMindMap(enhancedPrompt, 'text', config, contentAnalysis);
+    
+  } catch (error) {
+    console.error('Error generating mind map from URL:', error);
+    throw new Error('فشل في إنشاء خريطة ذهنية من الرابط: ' + (error as Error).message);
+  }
+}
+
+// Enhanced mind map generation with advanced AI
+export async function generateEnhancedMindMap(
+  prompt: string,
+  inputType: 'text' | 'image' | 'audio' | 'video' | 'url' = 'text',
+  config: AIConfig = {
+    model: 'gemini-pro',
+    creativity: 70,
+    depth: 60,
+    language: 'ar',
+    style: 'professional',
+    includeEmojis: true,
+    includeColors: true,
+    maxNodes: 20
+  },
+  contentAnalysis?: ContentAnalysisResult
 ): Promise<{ nodes: Node[], edges: Edge[], metadata: any }> {
   try {
     const model = models[config.model];
@@ -723,6 +755,86 @@ function createFallbackAnalysis(nodes: Node[], edges: Edge[]) {
       'قلة الروابط المتصلة'
     ]
   };
+}
+
+// Create enhanced prompt from content analysis
+function createPromptFromContent(contentAnalysis: ContentAnalysisResult, config: AIConfig): string {
+  const { title, description, content, extractedData, metadata } = contentAnalysis;
+  
+  let prompt = `إنشاء خريطة ذهنية شاملة للمحتوى التالي:\n\n`;
+  prompt += `العنوان: ${title}\n`;
+  
+  if (description) {
+    prompt += `الوصف: ${description}\n`;
+  }
+  
+  if (metadata.author) {
+    prompt += `المؤلف: ${metadata.author}\n`;
+  }
+  
+  if (metadata.duration) {
+    prompt += `المدة: ${metadata.duration}\n`;
+  }
+  
+  prompt += `\nالمحتوى الأساسي:\n${content.substring(0, 2000)}\n`;
+  
+  if (extractedData.headings.length > 0) {
+    prompt += `\nالعناوين الرئيسية:\n${extractedData.headings.slice(0, 5).join('\n')}\n`;
+  }
+  
+  if (extractedData.keyPoints.length > 0) {
+    prompt += `\nالنقاط الأساسية:\n${extractedData.keyPoints.slice(0, 5).join('\n')}\n`;
+  }
+  
+  if (extractedData.topics.length > 0) {
+    prompt += `\nالمواضيع المتعلقة: ${extractedData.topics.slice(0, 8).join(', ')}\n`;
+  }
+  
+  prompt += `\nنوع المحتوى: ${contentAnalysis.type === 'youtube' ? 'فيديو يوتيوب' : 'صفحة ويب'}\n`;
+  prompt += `المصدر: ${metadata.url}\n\n`;
+  prompt += `أنشئ خريطة ذهنية تنظم هذا المحتوى بطريقة منطقية ومفيدة، مع التركيز على الأفكار الرئيسية والعلاقات بينها.`;
+  
+  return prompt;
+}
+
+// Enhanced URL validation and processing
+export function validateAndProcessURL(input: string): { isURL: boolean; processedURL?: string; error?: string } {
+  try {
+    // Remove extra spaces and normalize
+    const cleaned = input.trim();
+    
+    // Check if it's a YouTube URL pattern
+    const youtubePatterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+      /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)/
+    ];
+    
+    // Check if it's a general URL pattern
+    const urlPattern = /^(?:https?:\/\/)?(?:www\.)?[\w\-]+(\.[\w\-]+)+/;
+    
+    if (youtubePatterns.some(pattern => pattern.test(cleaned))) {
+      // It's a YouTube URL
+      if (!cleaned.startsWith('http')) {
+        return { isURL: true, processedURL: `https://${cleaned}` };
+      }
+      return { isURL: true, processedURL: cleaned };
+    }
+    
+    if (urlPattern.test(cleaned)) {
+      // It's a general URL
+      if (!cleaned.startsWith('http')) {
+        return { isURL: true, processedURL: `https://${cleaned}` };
+      }
+      return { isURL: true, processedURL: cleaned };
+    }
+    
+    // Try to create a URL object to validate
+    new URL(cleaned.startsWith('http') ? cleaned : `https://${cleaned}`);
+    return { isURL: true, processedURL: cleaned.startsWith('http') ? cleaned : `https://${cleaned}` };
+    
+  } catch (error) {
+    return { isURL: false, error: 'رابط غير صحيح' };
+  }
 }
 
 // Re-export with backward compatibility

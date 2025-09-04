@@ -32,7 +32,7 @@ import EnhancedCustomNode from './components/EnhancedCustomNode';
 import AdvancedAIPanel from './components/AdvancedAIPanel';
 import EnhancedToolbar from './components/EnhancedToolbar';
 import WelcomeScreen from './components/WelcomeScreen';
-import { generateMindMap, expandNode } from './services/enhancedAIService';
+import { generateMindMap, expandNode, generateMindMapFromURL } from './services/enhancedAIService';
 import { exportMindMap, importMindMap } from './utils/fileUtils';
 
 const nodeTypes: NodeTypes = {
@@ -45,9 +45,9 @@ const initialNodes: Node[] = [
     type: 'custom',
     position: { x: 400, y: 300 },
     data: {
-      label: 'MindForge',
+      label: 'NeuralMind Pro',
       type: 'central',
-      description: 'أداة إنشاء الخرائط الذهنية بالذكاء الاصطناعي - الجيل القادم',
+      description: 'منصة احترافية لإنشاء الخرائط الذهنية بالذكاء الاصطناعي - تحليل المحتوى من النصوص والروابط والفيديوهات',
       emoji: '🧠',
       color: '#667eea'
     },
@@ -169,11 +169,19 @@ function App() {
     setSelectedNode(selectedNode === node.id ? null : node.id);
   }, [selectedNode]);
 
-  const handleGenerateMindMap = async (prompt: string, inputType: 'text' | 'image' | 'audio' | 'video' = 'text', config?: any) => {
+  const handleGenerateMindMap = async (prompt: string, inputType: 'text' | 'image' | 'audio' | 'video' | 'url' = 'text', config?: any) => {
     setIsGenerating(true);
     try {
       saveState();
-      const result = await generateMindMap(prompt, inputType, config);
+      
+      let result;
+      if (inputType === 'url') {
+        // Generate from URL
+        result = await generateMindMapFromURL(prompt, config);
+      } else {
+        // Generate from text or other inputs
+        result = await generateMindMap(prompt, inputType, config);
+      }
       
       // Handle the new enhanced response format
       if (result && typeof result === 'object' && 'nodes' in result) {
@@ -192,6 +200,7 @@ function App() {
     } catch (error) {
       console.error('Error generating mind map:', error);
       // Show error notification
+      alert('حدث خطأ في إنشاء الخريطة الذهنية: ' + (error as Error).message);
     }
     setIsGenerating(false);
   };
@@ -337,9 +346,9 @@ function App() {
                   <Brain className="w-6 h-6 text-white" />
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-2xl font-bold gradient-text-animated">MindForge</h1>
+                  <h1 className="text-2xl font-bold gradient-text-animated">NeuralMind Pro</h1>
                   <p className="text-sm text-slate-600 dark:text-slate-400">
-                    الجيل القادم من أدوات الخرائط الذهنية
+                    منصة احترافية للخرائط الذهنية بالذكاء الاصطناعي
                   </p>
                 </div>
               </div>

@@ -27,7 +27,7 @@ import {
   Camera,
   Layers,
   RefreshCw,
-
+  Link,
   Cpu,
   MessageSquare,
   ChevronRight,
@@ -37,13 +37,15 @@ import {
   ThumbsDown,
   Copy,
   Download,
-  Share
+  Share,
+  ExternalLink
 } from 'lucide-react';
+import { validateAndProcessURL } from '../services/enhancedAIService';
 
 interface AIPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  onGenerateMindMap: (prompt: string, type: 'text' | 'image' | 'audio' | 'video', config?: any) => void;
+  onGenerateMindMap: (prompt: string, type: 'text' | 'image' | 'audio' | 'video' | 'url', config?: any) => void;
   isGenerating: boolean;
 }
 
@@ -144,6 +146,7 @@ const categories = [
 
 const inputTypes = [
   { id: 'text', name: 'نص', icon: FileText, description: 'اكتب فكرتك مباشرة' },
+  { id: 'url', name: 'رابط', icon: Link, description: 'رابط موقع أو فيديو يوتيوب' },
   { id: 'image', name: 'صورة', icon: Image, description: 'ارفع صورة لتحليلها' },
   { id: 'audio', name: 'صوت', icon: Mic, description: 'تسجيل صوتي أو ملف صوتي' },
   { id: 'video', name: 'فيديو', icon: Video, description: 'ملف فيديو للتحليل' }
@@ -151,10 +154,11 @@ const inputTypes = [
 
 export default function AdvancedAIPanel({ isOpen, onClose, onGenerateMindMap, isGenerating }: AIPanelProps) {
   const [prompt, setPrompt] = useState('');
-  const [inputType, setInputType] = useState<'text' | 'image' | 'audio' | 'video'>('text');
+  const [inputType, setInputType] = useState<'text' | 'image' | 'audio' | 'video' | 'url'>('text');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedTemplate, setSelectedTemplate] = useState<AITemplate | null>(null);
+  const [urlValidation, setUrlValidation] = useState<{ isValid?: boolean; error?: string }>({});
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [aiConfig, setAiConfig] = useState<AIConfig>({
     model: 'gemini-pro',
@@ -171,7 +175,23 @@ export default function AdvancedAIPanel({ isOpen, onClose, onGenerateMindMap, is
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (prompt.length > 10) {
+    if (inputType === 'url' && prompt.length > 5) {
+      // Validate URL in real-time
+      const validation = validateAndProcessURL(prompt);
+      setUrlValidation(validation);
+      
+      if (validation.isURL) {
+        const smartSuggestions = [
+          'تحليل المحتوى الأساسي',
+          'استخراج النقاط الرئيسية', 
+          'تنظيم المعلومات هرمياً',
+          'إضافة روابط منطقية'
+        ];
+        setSuggestions(smartSuggestions);
+      } else {
+        setSuggestions([]);
+      }
+    } else if (inputType === 'text' && prompt.length > 10) {
       // Generate smart suggestions based on input
       const smartSuggestions = [
         'أضف تحليل SWOT للموضوع',
@@ -182,23 +202,37 @@ export default function AdvancedAIPanel({ isOpen, onClose, onGenerateMindMap, is
       setSuggestions(smartSuggestions);
     } else {
       setSuggestions([]);
+      setUrlValidation({});
     }
-  }, [prompt]);
+  }, [prompt, inputType]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (prompt.trim() || selectedFile) {
-      onGenerateMindMap(prompt, inputType, aiConfig);
-      
-      // Add to recent prompts
-      if (prompt.trim()) {
-        setRecentPrompts(prev => [prompt, ...prev.slice(0, 4)]);
+    
+    // Validate URL input if type is URL
+    if (inputType === 'url') {
+      const validation = validateAndProcessURL(prompt);
+      if (!validation.isURL) {
+        setUrlValidation({ isValid: false, error: validation.error || 'رابط غير صحيح' });
+        return;
       }
-      
-      setPrompt('');
-      setSelectedFile(null);
-      setSelectedTemplate(null);
+      // Use processed URL
+      onGenerateMindMap(validation.processedURL || prompt, inputType, aiConfig);
+    } else if (prompt.trim() || selectedFile) {
+      onGenerateMindMap(prompt, inputType, aiConfig);
+    } else {
+      return;
     }
+    
+    // Add to recent prompts
+    if (prompt.trim()) {
+      setRecentPrompts(prev => [prompt, ...prev.slice(0, 4)]);
+    }
+    
+    setPrompt('');
+    setSelectedFile(null);
+    setSelectedTemplate(null);
+    setUrlValidation({});
   };
 
   const handleTemplateSelect = (template: AITemplate) => {
@@ -533,25 +567,78 @@ export default function AdvancedAIPanel({ isOpen, onClose, onGenerateMindMap, is
               </div>
             )}
 
-            {/* Text Input */}
+            {/* Text/URL Input */}
             <div className="relative mb-4">
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder={
-                  selectedTemplate 
-                    ? "يمكنك تعديل القالب أو إضافة تفاصيل أخرى..."
-                    : "اكتب فكرتك هنا، مثال: خطة تسويقية لمنتج جديد، دراسة حالة لمشروع تقني، أو أي موضوع تريد تحويله لخريطة ذهنية..."
-                }
-                rows={4}
-                className="input-neural w-full resize-none pr-12"
-                dir="rtl"
-              />
-              
-              {/* Character Counter */}
-              <div className="absolute bottom-3 left-3 text-xs text-slate-500">
-                {prompt.length}/500
-              </div>
+              {inputType === 'url' ? (
+                <div>
+                  <div className="relative">
+                    <input
+                      type="url"
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      placeholder="أدخل رابط الموقع أو فيديو يوتيوب... مثال: https://www.example.com أو https://youtube.com/watch?v=..."
+                      className={`input-neural w-full pl-12 ${
+                        urlValidation.error ? 'border-red-300 focus:border-red-500' : 
+                        urlValidation.isValid ? 'border-green-300 focus:border-green-500' : ''
+                      }`}
+                      dir="ltr"
+                    />
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                      {urlValidation.isValid ? (
+                        <ExternalLink className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <Link className="w-5 h-5 text-slate-400" />
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* URL Validation Feedback */}
+                  {urlValidation.error && (
+                    <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+                      <X className="w-4 h-4" />
+                      {urlValidation.error}
+                    </p>
+                  )}
+                  
+                  {urlValidation.isValid && (
+                    <p className="text-sm text-green-600 mt-2 flex items-center gap-1">
+                      <ExternalLink className="w-4 h-4" />
+                      رابط صحيح - جاهز للتحليل
+                    </p>
+                  )}
+                  
+                  {/* URL Examples */}
+                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <h5 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">أمثلة على الروابط المدعومة:</h5>
+                    <div className="text-xs text-blue-600 dark:text-blue-300 space-y-1">
+                      <div>• فيديو يوتيوب: https://youtube.com/watch?v=xyz</div>
+                      <div>• مقال أو مدونة: https://example.com/article</div>
+                      <div>• صفحة ويكيبيديا: https://ar.wikipedia.org/wiki/...</div>
+                      <div>• موقع إخباري أو تعليمي</div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative">
+                  <textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder={
+                      selectedTemplate 
+                        ? "يمكنك تعديل القالب أو إضافة تفاصيل أخرى..."
+                        : "اكتب فكرتك هنا، مثال: خطة تسويقية لمنتج جديد، دراسة حالة لمشروع تقني، أو أي موضوع تريد تحويله لخريطة ذهنية..."
+                    }
+                    rows={4}
+                    className="input-neural w-full resize-none pr-12"
+                    dir="rtl"
+                  />
+                  
+                  {/* Character Counter */}
+                  <div className="absolute bottom-3 left-3 text-xs text-slate-500">
+                    {prompt.length}/500
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Smart Suggestions */}
@@ -600,7 +687,11 @@ export default function AdvancedAIPanel({ isOpen, onClose, onGenerateMindMap, is
             <div className="flex items-center justify-between gap-3">
               <button
                 type="submit"
-                disabled={(!prompt.trim() && !selectedFile) || isGenerating}
+                disabled={
+                  (!prompt.trim() && !selectedFile) || 
+                  isGenerating || 
+                  (inputType === 'url' && (!urlValidation.isValid && prompt.length > 5))
+                }
                 className="btn-neural flex items-center gap-2 px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed flex-1"
               >
                 {isGenerating ? (

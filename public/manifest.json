@@ -1,46 +1,51 @@
 {
-  "name": "MindForge - أداة إنشاء الخرائط الذهنية بالذكاء الاصطناعي",
-  "short_name": "MindForge",
-  "description": "أداة متقدمة لإنشاء وتطوير الخرائط الذهنية باستخدام الذكاء الاصطناعي المتطور",
+  "name": "NeuralMind Pro - منصة الخرائط الذهنية بالذكاء الاصطناعي",
+  "short_name": "NeuralMind Pro",
+  "description": "منصة احترافية لإنشاء الخرائط الذهنية بالذكاء الاصطناعي مع دعم تحليل الروابط والفيديوهات",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1e293b",
+  "background_color": "#ffffff",
   "theme_color": "#667eea",
-  "lang": "ar",
-  "dir": "rtl",
-  "orientation": "portrait-primary",
-  "categories": ["productivity", "education", "business"],
+  "orientation": "any",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "/icon-192.png",
-      "type": "image/png",
+      "src": "/neuralmind-pro-icon-192.png",
       "sizes": "192x192",
-      "purpose": "maskable"
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "/icon-512.png",
-      "type": "image/png",
+      "src": "/neuralmind-pro-icon-512.png", 
       "sizes": "512x512",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "maskable any"
     }
   ],
+  "categories": ["education", "productivity", "business"],
+  "lang": "ar",
+  "dir": "rtl",
+  "scope": "/",
   "screenshots": [
     {
-      "src": "/screenshot1.png",
-      "type": "image/png",
+      "src": "/neuralmind-pro-screenshot-1.png",
       "sizes": "1280x720",
-      "form_factor": "wide"
+      "type": "image/png",
+      "label": "واجهة إنشاء الخرائط الذهنية"
     },
     {
-      "src": "/screenshot2.png",
+      "src": "/neuralmind-pro-screenshot-2.png", 
+      "sizes": "1280x720",
       "type": "image/png",
-      "sizes": "750x1334",
-      "form_factor": "narrow"
+      "label": "لوحة الذكاء الاصطناعي"
     }
-  ]
+  ],
+  "features": [
+    "خرائط ذهنية تفاعلية",
+    "ذكاء اصطناعي متقدم", 
+    "تحليل الروابط والفيديوهات",
+    "واجهة عربية متكاملة",
+    "تصدير متعدد الصيغ"
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

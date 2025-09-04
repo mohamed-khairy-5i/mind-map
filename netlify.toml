@@ -9,23 +9,47 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  NPM_FLAGS = "--version"
+
+# Security and performance headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Security headers
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
 
 [[headers]]
   for = "/static/*"
   [headers.values]
-    cache-control = "max-age=31536000"
+    cache-control = "max-age=31536000, immutable"
 
 [[headers]]
   for = "/*.js"
   [headers.values]
-    cache-control = "max-age=31536000"
+    cache-control = "max-age=31536000, immutable"
 
 [[headers]]
   for = "/*.css"
   [headers.values]
-    cache-control = "max-age=31536000"
+    cache-control = "max-age=31536000, immutable"
 
 [[headers]]
   for = "/manifest.json"
   [headers.values]
-    cache-control = "max-age=0"
+    cache-control = "max-age=86400"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    cache-control = "max-age=0, must-revalidate"
+
+# Redirect old domains (if any)
+[[redirects]]
+  from = "https://mindforge.netlify.app/*"
+  to = "https://neuralmind-pro.netlify.app/:splat"
+  status = 301
+  force = true
